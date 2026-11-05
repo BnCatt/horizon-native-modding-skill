@@ -32,7 +32,8 @@ Read the reference that matches the task; this page is the map and the rules tha
 | Launcher build fails, Windows `os error 32`, dev loop | `references/launcher-build-windows.md` |
 | Someone's mods broke after a Nightly update | `references/fixing-third-party-mods.md` |
 | Join 1.21.x servers, version picker, item translation bugs | `references/older-servers.md` |
-| Simple Voice Chat client / audio / Opus on Windows | `references/voice-chat.md` |
+| Vanilla-looking screens: sprites, nine-slice, sliders, icons, over-head icons | `references/gui-sprites.md` |
+| Simple Voice Chat client / audio / Opus, rnnoise on Windows | `references/voice-chat.md` |
 | Prove it works (Paper + RCON + horizon-ctl, bisecting) | `references/testing.md` |
 
 ## The workflow
@@ -103,4 +104,6 @@ Read the reference that matches the task; this page is the map and the rules tha
   server and find which command makes the client log `could not translate`.
 - `scripts/build_opus.py <opus src> <gcc> <out>`: `opus.dll` from the official libopus source with
   the launcher's own MinGW.
+- `scripts/build_rnnoise.py <rnnoise-0.2.tar.gz> <gcc> <out>`: `rnnoise.dll` from xiph's release
+  tarball, checked against its pinned SHA-256.
 - `scripts/prep_native_build.sh`: clears the launcher's stale build leftovers before a native build.

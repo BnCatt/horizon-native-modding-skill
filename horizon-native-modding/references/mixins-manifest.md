@@ -15,7 +15,12 @@ mymod/                         # repo root
 └── tools/package.py           # → target/mymod-x.y.z.hnmod
 ```
 
-`.hnmod` = zip of `horizon-native.json` + `mixins/<id>/**.rs|.toml` (source only).
+`.hnmod` = zip of `horizon-native.json` + `mixins/<id>/**.rs|.toml` (source only; besides those
+only `data/` and README/LICENSE/COPYING pass, so images or text data go into generated `.rs`).
+Entry names need `/` (never Windows' backslash), and a `.gitattributes` with `* text=auto eol=lf`
+keeps `core.autocrlf` from changing the bytes (and hashes) between machines. A combined `.hmod`
+(`horizon-mod.toml` + `assets/` + the same) is described in Horizon's `docs/mod-files.md`, but the
+launcher (f319701, main) only loads `.hnmod` from `horizon-native-mods/`: see gui-sprites.md.
 `horizon-native.json`: `{schema:1, id, version, game:"26.3", horizon:<commit>, mixins:<horizon-mixins
 commit>, hooks?:N}`. With `hooks`, `horizon` is just the commit it was tested on.
 
@@ -109,7 +114,17 @@ MODIFY_VARIABLE, WRAP_OPERATION, OVERWRITE. HEAD + cancellable covers most needs
   `[workspace]`, no path/git deps, no dependency on Horizon crates. Types from the game reach the
   crate only through helper code.
 - Unit-test the crate alone with `cargo test --offline` (launcher's toolchain, its CARGO_HOME), then
-  delete the `Cargo.lock` it creates before planning.
+  delete the `Cargo.lock` it creates before planning. Outside the launcher, a fresh lock resolves
+  newer crate versions than Horizon's; pin them to Horizon's `Cargo.lock` first
+  (`cargo update -p cpal --precise 0.16.0`, same for `libloading`, `ring`, `log`…), so the tests
+  run what the game build will.
+- Type-check helpers without building the game: a scratch crate that depends on the mod crate and
+  declares stand-ins with the exact signatures the helpers call (`mod game { pub struct Game<'a>(…);
+  impl Game<'_> { pub fn native_sprite(&self, batch: &mut HudBatch, name: &str, src: [f32; 4],
+  dst: [f32; 4]) -> bool {…} … } }`, `mod horizon_client { pub mod hud { pub struct HudBatch {…} } }`),
+  then `include!` the helper files and `cargo check`. Copy each signature from the target
+  revision's `native_hooks.rs`. It catches closure and borrow mistakes in seconds; it is not a
+  substitute for `horizon-mixins plan` and a real build.
 
 ## compatibility.json
 

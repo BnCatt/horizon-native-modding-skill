@@ -30,6 +30,8 @@ Each hook's doc comment states its API level ("API 408") and side (client/server
 | `hud` | `native_hud(&mut self, batch, corners)` | in-world HUD |
 | `screen_render_post` | `(&self, batch, screen: &NativeScreenView)` | all screens incl. title ones: `screen.id` = `title`, `multiplayer`, `direct_connect`, `inventory`, … (stable ids); `screen.mouse` = GUI coords |
 | `screen_mouse_button_pressed_pre` | `(&self, screen, button, modifiers, canceled: &mut bool)` | set `*canceled = true` to swallow the click |
+| `screen_mouse_button_released_pre` (API 80) | `(&self, screen, button, modifiers, canceled)` | end of a drag: store slider values here |
+| `screen_mouse_dragged_pre` (API 123) | `(&self, screen, button, delta: [f32; 2], modifiers, canceled)` | sliders; `screen.mouse` is the pointer |
 | `screen_key_pressed_pre`, `screen_char_typed_pre`, `screen_mouse_scrolled_pre` | | text fields in mod screens |
 | `mods` | `(&mut self, mods: &mut Vec<NativeMod>)` | the mod's row in Options > Mods (`NativeMod {id,title,description,keys}`) |
 | `settings`, `settings_click` | buttons on the mod's settings page | |
@@ -40,6 +42,9 @@ Helpers: `native_on(id)` (Options > Mods switch), `native_setting(id,key)` /
 `native_data_dir(id)` (that folder: ship files such as DLLs there), `native_player()`
 (x,y,z,yaw…), `native_playing()`, `native_chat(text)`, `native_text(batch,text,[x,y],rgb,shadow)`,
 `native_fill(batch,[x,y,w,h],argb)`, `native_text_width(text)`, `native_cursor()`,
+`native_sprite(batch,name,src,dst) -> bool` / `native_sprite_size(name)` (API 19, GUI atlas: see
+gui-sprites.md), `native_corner_shown(Corner)` + `corners.place(Corner, w, h) -> (x, y)` (stack HUD
+blocks with other mods'),
 `native_mod_screen()/…_open/…_close`, `native_window()`.
 
 Networking (`game/native_net.rs`):

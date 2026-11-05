@@ -20,14 +20,16 @@ horizon-native-modding/
 │   ├── launcher-build-windows.md  # native-build, profiles, os error 32 fixes, dev loop
 │   ├── fixing-third-party-mods.md # plan-all procedure + real breakages and fixes
 │   ├── older-servers.md           # protocol adapter, version picker mod, EitherHolder items
-│   ├── voice-chat.md              # Simple Voice Chat client on hook points, opus.dll on Windows
+│   ├── gui-sprites.md             # vanilla-looking screens: sprites, nine-slice, sliders, icons
+│   ├── voice-chat.md              # Simple Voice Chat client on hook points, opus/rnnoise on Windows
 │   └── testing.md                 # Paper + RCON + horizon-ctl, bisecting translation bugs
 └── scripts/
     ├── package_hnmod.py           # deterministic source-only .hnmod (+ --install)
     ├── patch_hnmod.py             # one-line fix inside an installed .hnmod
     ├── prep_native_build.sh       # clear the launcher's stale build leftovers
     ├── rcon.py, bisect.py         # drive a test server, find failing packets
-    └── build_opus.py              # opus.dll from official libopus with MinGW
+    ├── build_opus.py              # opus.dll from official libopus with MinGW
+    └── build_rnnoise.py           # rnnoise.dll from xiph's v0.2 release tarball
 ```
 
 ## Install
@@ -51,5 +53,5 @@ Claude picks it up when you mention Horizon, `.hnmod`, horizon-mixins, native-bu
 
 ## License
 
-MIT (see LICENSE). `scripts/build_opus.py` builds libopus, which is BSD-3-Clause; ship libopus'
-COPYING with any DLL you distribute.
+MIT (see LICENSE). `scripts/build_opus.py` builds libopus and `scripts/build_rnnoise.py` rnnoise,
+both BSD-3-Clause; ship their COPYING with any DLL you distribute.
