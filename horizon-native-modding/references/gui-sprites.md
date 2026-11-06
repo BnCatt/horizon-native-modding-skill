@@ -79,3 +79,17 @@ yaw/pitch/fov → GUI pixels). For an icon above a name tag, size it from the pr
 GUI distance between `point` and `point + 0.35 blocks up`, clamped to 4..16 px and rounded, so it
 shrinks with distance like the name tag. Put it ~1.1 blocks above the eyes (0.3 more when your
 own label sits there) and draw far ones first.
+
+## A full screen over the title menus (f319701)
+
+`native_mod_screen_open` refuses over the title (Multiplayer, Add/Edit Server, Direct Connect),
+and horizon-mixins refuses an injection into `multiplayer::Screen::draw`
+(`E_UNSUPPORTED_CONTROL_FLOW`). What works: in `screen_render_post` on those screen ids, throw away
+what the screen drew (`batch.vertices.clear(); batch.blends.clear(); batch.blur_at = 0;` — the
+title draws first into a fresh batch and the panorama is rendered outside it), then draw your own
+screen with `horizon_client::ui` (`menu_background`, `list_background`, `separators`, `scrollbar`,
+`button`, `nine_slice` with `gui/sprites/widget/tab*`, `menu_tab_label`, `EditBox::draw`,
+`tooltip`, `text_scaled`) and `batch.clip_since(first, x0, y0, x1, y1)` to clip list rows. Swallow
+every `screen_*_pre` event (pressed, released, dragged, scrolled, key, char) while it is open. Draw
+from a `[[module]]` in `game/native_hooks.rs` (it can read `Game::gui.atlas` and `Game::title`).
+`game.native_item(batch, "minecraft:x", [x, y], 16.0)` draws item icons there.

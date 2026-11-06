@@ -58,3 +58,6 @@ component, `summon` every entity type, displays, particles, titles/bossbar/score
 dimension changes, death and respawn. Also play client-side actions (break/place, open a chest and
 shift-click, eat, throw, attack, shear, trade, ride). Compare against a build without your fix to
 show the before/after.
+- On the title screens `key` and `type` answer "no world open": keyboard input to a title-menu
+  overlay (Escape, a search box) can't be driven by horizon-ctl; test it by hand. `click-at` and
+  `click-button` work there (`ui` gives `gui_size`; a screenshot is `gui_size` × the GUI scale).
