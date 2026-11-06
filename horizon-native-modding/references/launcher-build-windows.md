@@ -60,6 +60,17 @@ Seen three ways; fix in this order:
   build. See `fixing-third-party-mods.md`.
 - "Some mods were made for other Horizon versions (a → x, b → y…)" is a hint, not the error.
 
+## A Windows machine without the launcher
+
+To test a mod crate and build DLLs where no launcher is installed:
+- `winget install Rustlang.Rustup`, then `rustup toolchain install stable-x86_64-pc-windows-gnu
+  --profile minimal` and make it the default (Horizon builds with the GNU toolchain), and
+  `winget install BrechtSanders.WinLibs.POSIX.UCRT` for gcc. WinLibs lands in
+  `%LOCALAPPDATA%\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_*\mingw64\bin`; put it
+  and `~/.cargo/bin` on PATH in every shell (a small `env.sh` to source).
+- `git config --global core.longpaths true` before cloning Horizon (`Filename too long` otherwise).
+  A shallow fetch of one revision is enough to read hook signatures (~170 MB).
+
 ## Local dev loop without the launcher
 
 Faster for iterating on your own mod (no other mods, incremental):

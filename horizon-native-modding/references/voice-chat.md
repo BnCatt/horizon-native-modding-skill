@@ -14,6 +14,7 @@ pinned to an old Nightly and reads `remote::handle_packet` / `tick_remote` / `re
 | listener position | `native_player()` |
 | joined address, other players, camera | one internal `[[module]]` in `game/remote.rs` (see hook-points.md) |
 | menu, keys, HUD, settings | `screen_*`, `key`, `hud`, `settings`, `mods` hooks |
+| sliders | `native_screen_mouse_dragged_pre` (API 123) + `..._button_released_pre` (gui-sprites.md) |
 
 Declare `"hooks": 409` → builds on any later Horizon (the module is the only fragile part).
 
@@ -42,3 +43,43 @@ SVC Bukkit/Paper plugin from Modrinth (`api.modrinth.com/v2/project/simple-voice
 loaders=["bukkit","paper"]&game_versions=["<ver>"]`, check the sha512), UDP 24454 open. With
 Horizon joining a 1.21.11 server the adapter must be on (older-servers.md); payload channels pass
 through unchanged.
+
+## Looking like the Java mod (1.2.0)
+
+BnCatt/horizon-voice-chat 1.2.0 redid the menu as SVC's screens: a stack (main → settings / groups /
+create group / adjust volumes / device lists; Escape pops one, the open key closes all), vanilla
+widget sprites with stand-ins (gui-sprites.md), own 16×16 icons, a status icon bottom left
+(microphone / muted / off / disconnected / whispering, in that priority), the group's members top
+left with a speaker by whoever talks, and a speaker over talking players' heads.
+
+- Keep every screen a pure function `layout(screen, state, view, gui size, mouse, text width) ->
+  (draws, widgets)`; clicks hit-test the widgets drawn last. Then each screen is unit-testable
+  without the game (symmetry, everything on screen at 320×240, long names cut, scrolling).
+- Per-player volume: 0–400 % like SVC, stored as `volume.<hyphenated uuid>` with
+  `native_set_setting`, loaded when the player's state first arrives. Store on button release.
+- Device choice: list names with cpal (`input_devices()` / `output_devices()`), keep the chosen
+  *name* (None = system default), fall back to the default with a log line when it's gone, and
+  restart the audio streams on change.
+- "Talking" = a voice packet from that player within the last ~300 ms (and, for yourself, the mic
+  thread's transmitting flag).
+
+## Noise suppression (rnnoise)
+
+SVC's "denoiser" is rnnoise. No crate for it in Horizon's lock (`nnnoiseless` is absent), so load
+it like libopus:
+- One `dylib` helper: try `native_data_dir(id)/<name>` first, then system names
+  (`librnnoise.so.0`, `librnnoise.0.dylib`, Homebrew paths, `rnnoise.dll`); keep every error for the
+  message. Share it between opus and rnnoise.
+- API: `rnnoise_create(NULL)` (built-in model), `rnnoise_process_frame(st, out, in) -> f32` on
+  **480** floats at 48 kHz, `rnnoise_destroy`. Check `rnnoise_get_frame_size() == 480`. Samples are
+  16-bit *scaled* floats: multiply by 32768 in, divide out. An Opus frame (960) is two rnnoise frames.
+- Make the denoiser lazily on the mic thread; when the DLL is missing, grey the setting out ("N/A",
+  tooltip with why) and pass audio through unchanged.
+- Windows DLL: `scripts/build_rnnoise.py` from the **release tarball** (the git tree has no model;
+  `rnnoise-0.2.tar.gz` from github.com/xiph/rnnoise/releases carries `src/rnnoise_data.c`, ~1.4 MB
+  DLL). No upstream checksum is published for it: the script pins the SHA-256 of v0.2's asset. Pass
+  `-DWIN32 -DRNNOISE_BUILD -DDLL_EXPORT` or nothing is exported. BSD-3: ship `COPYING.rnnoise`.
+- Test: a second of xorshift hiss should drop ≥ 6 dB (measured −74 dB) while a 440 Hz tone with
+  harmonics under the same hiss keeps > −10 dB (measured −0.2 dB). Point tests at the built DLLs
+  with an env var (`VOICECHAT_TEST_OPUS_DIR`) and set it before the first load in *every* test, or
+  a parallel test caches "not found" first.
