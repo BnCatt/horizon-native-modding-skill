@@ -48,9 +48,9 @@ through unchanged.
 
 BnCatt/horizon-voice-chat 1.2.0 redid the menu as SVC's screens: a stack (main → settings / groups /
 create group / adjust volumes / device lists; Escape pops one, the open key closes all), vanilla
-widget sprites with stand-ins (gui-sprites.md), own 16×16 icons, a status icon bottom left
-(microphone / muted / off / disconnected / whispering, in that priority), the group's members top
-left with a speaker by whoever talks, and a speaker over talking players' heads.
+widget sprites with stand-ins (gui-sprites.md), own 16×16 icons, a status icon bottom left, the
+group's members top left, and a speaker over talking players' heads. Simple Chat Rust 1.1.0 moved
+all of that to SVC's exact numbers (see "Matching SVC's layout" below).
 
 - Keep every screen a pure function `layout(screen, state, view, gui size, mouse, text width) ->
   (draws, widgets)`; clicks hit-test the widgets drawn last. Then each screen is unit-testable
@@ -70,13 +70,14 @@ left with a speaker by whoever talks, and a speaker over talking players' heads.
   `.horizon-mod-data/<id>/icons/<name>.png`, decoded at run time with the `png` crate (0.18, in
   Horizon's Cargo.lock) and drawn as fills (a player's own copy, never redistributed).
 - A hide-icons key (SVC's default is H) just flips the stored `hide_icons` setting; the HUD status
-  icon and the over-head speakers both check it.
+  icon and the name-tag icons both check it.
 - A "Chat Messages" setting gates every line the mod puts in the chat (toggle feedback, group
   joins, errors): filter where the lines are taken, not at each call site.
 - Renaming a mod's id moves its data folder and its `horizon-mods.txt` lines: copy
   `.horizon-mod-data/<old>/` to the new id and rewrite `mod.<old>`/`key.<old>.*`. Also rename the
   crate, the `[[module]]` names and helper fn prefixes, or the old and new mod can't be built
-  together.
+  together. Grep the tools too: a generator writing `mixins/<old>/…/icons.rs` fails only when run
+  (and its "committed files are current" test with it).
 
 ## Noise suppression (rnnoise)
 
@@ -98,3 +99,44 @@ it like libopus:
   harmonics under the same hiss keeps > −10 dB (measured −0.2 dB). Point tests at the built DLLs
   with an env var (`VOICECHAT_TEST_OPUS_DIR`) and set it before the first load in *every* test, or
   a parallel test caches "not found" first.
+
+## Matching SVC's layout (Simple Chat Rust 1.1.0)
+
+Players compare against the Java mod side by side; "close" reads as wrong. Take the numbers from
+SVC's source (branch for the MC version, `gui/*Screen.java`, `RenderEvents`, `GroupChatManager`)
+and pin each one in a layout test. What 1.1.0 uses (GUI pixels, panel-relative unless noted):
+- **HUD status icon**: `[16, h - 32, 16, 16]` (`hud_icon_pos_x` 16, `_y` -16). Priority:
+  disconnected → off → muted → whispering → talking; nothing when idle.
+- **Name-tag icon** (other players only): gui-sprites.md "Next to a player's name tag". Priority:
+  whispering → talking → disconnected → in a group that isn't yours (group icon) → voice chat off →
+  muted; players without a voice state get none.
+- **Group HUD**: from (4, 4), one 20 px cell per member 22 px apart downwards, face 16 px at +2,
+  a talk outline around the cell, speaker-off small on the face.
+- **Main** 195×76 centred: title y 7 (`0x404040`, no shadow); text buttons Settings `[6,21,75,20]`,
+  Group `[114,21,75,20]`; 20×20 icon buttons at y 50: mute x 6, disable x 28, adjust volumes x 50,
+  hide icons x 169.
+- **Settings** 248×219: rows `x 10, w 228, y 20 + 21·i`: volume, amplification, denoiser, (mic test
+  20×20 | activation type at x 31 w 207), PTT key (or VAD), threshold, audio type, (Select Microphone
+  `w 113` | Select Speaker at `x 125`), Back (only outside a world: a free row for an extra toggle).
+- **List screens** (join group, group, devices): 236 wide, `left = (w - 236) / 2 + 2`, `top = 32`,
+  header 16, units of 18, footer 32: `units = max(3, (h - 16 - 32 - 64) / 18)`. Entries are 216×32
+  in 36 px cells centred on the *screen* (not the panel), from list top + 4; fills `0xFF4A4A4A`,
+  hovered `0xFF5A5A5A`, chosen device `0xFF282828`; padding 4, text vertically at `h/2 - 4`, white,
+  no shadow. Footer button `[left + 7, top + height - 27, 222, 20]`.
+- **Join group** entry: lock 16 px at +4, name after it, member faces 12 px two rows from the right;
+  click = join (a password group opens **Enter Password** 195×74: label (8,21), field `[7,30,181,14]`,
+  Join Group `[7,47,181,20]`). **Create Group** 195×124: labels (8,21)/(8,47), fields
+  `[7,30,181,14]`/`[7,56,181,14]`, type `[6,74,183,20]`, Create `[6,97,183,20]` (disabled until named).
+- **Group** (in one): entries with a 24 px outline at +4 (face 8/10 of it), name at +32, a ≤100 px
+  volume slider on the hovered member (not yourself); icon buttons at the footer y: mute 7,
+  disable 30, group HUD 53, leave 209.
+- **Adjust Volumes**: footer 8, `units = max(4, …)`, one tab `[left, top - 22, 236, 20]`, search
+  field `[left + 28, top + 22, 196, 12]` with a 12 px magnifier at (10, 20), list from top + 32;
+  entry: face 24 at +4, name at +32, 100 px slider at the right.
+- Horizon gives mods no skin textures, so faces are stand-ins (a colour from the uuid + the name's
+  first letter); say so to the player rather than leaving blank squares.
+- The PTT key's name for the settings row: `game.native_mod_key(id, KEY_PTT, default)` (returns
+  `String`) in the screen hook, handed to the engine before it lays out.
+- Test trap: two `voice()` (a `MutexGuard`) calls in one expression, e.g.
+  `assert_eq!((voice().a, voice().b), …)`, deadlock: the first guard lives to the end of the
+  statement. The test run just hangs; bind one guard in a block.
