@@ -72,13 +72,23 @@ setting then** (not on every drag event).
   (`Bundle::read` refuses a mismatch).
 - Make your own art. Don't copy another mod's textures, even for a look-alike.
 
-## Over players' heads
+## Next to a player's name tag
 
 Project a world point with the camera from the internal module (`labels::project`-style:
-yaw/pitch/fov → GUI pixels). For an icon above a name tag, size it from the projection itself: the
-GUI distance between `point` and `point + 0.35 blocks up`, clamped to 4..16 px and rounded, so it
-shrinks with distance like the name tag. Put it ~1.1 blocks above the eyes (0.3 more when your
-own label sits there) and draw far ones first.
+yaw/pitch/fov → GUI pixels) and draw the far ones first. To sit exactly where a Java mod draws in
+name-tag space (Simple Voice Chat's talking icon), rebuild vanilla's name-tag transform instead of
+guessing a height:
+- Anchor: `EntityRenderer` translates to the name tag attachment (a standing player's height 1.8,
+  i.e. eyes + 0.18) plus 0.5 up, so the text's **top** is at eyes + 0.68. Text is drawn *downwards*
+  from there (scale `0.025, -0.025`), so the tag spans eyes + 0.68 down to + 0.455.
+- Scale: project the anchor `p` and `anchor + 0.025 up` `q`; `s = p.y - q.y` is GUI pixels per text
+  pixel at that distance. Billboarded, so text-space x is screen x.
+- SVC's icon (`RenderEvents.renderIcon`): `x = p.x + (floor(nameWidth / 2) + 2) * s`,
+  `y = p.y + 0.25 * s`, `10 * s` square (a 8×8 glyph scaled 1.25 at y 1, offset y -1). `nameWidth` is
+  `native_text_width(name)` in GUI pixels, the same units as text pixels.
+- A label of your own (a group name) goes above the tag: eyes + ~0.95 clears it.
+An earlier version put a speaker ~1.1 blocks over the eyes; players reported it as "not where the
+Java mod shows it". Match the reference's math, not its look in a screenshot.
 
 ## A full screen over the title menus (f319701)
 
