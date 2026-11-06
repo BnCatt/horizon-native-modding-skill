@@ -29,7 +29,30 @@ horizon-launcher native-build --trust-native-code --allow-version-mismatch --pro
   newest pin. `--ignore-pins` builds everything on the selected version instead.
 - `--trust-native-code` = the player's consent to run the mods' code. Use only when they asked.
 - Success prints `native-<short>-<hash> built and selected for its instance`.
-- Close the launcher GUI first: a running GUI holds files in `native\` → os error 32.
+- Close the launcher GUI first: a running GUI holds files in `native\` → os error 32. A running
+  game (`horizon-client.exe`) locks too; ask the player before closing it.
+
+## Launcher 0.2.45+ (November 2026): which mods it builds
+
+- `native-build` with no FOLDER builds **the native mods installed and turned on in the instance**:
+  the `mod.<id>:true` lines of `%APPDATA%\horizon\horizon-mods.txt`, not simply every file in
+  `horizon-native-mods\`. A new `.hnmod` dropped into the folder with no `mod.<id>:true` line is left
+  out, and a removed mod whose line still says `true` can come back from the launcher's caches
+  (`native\installed.incoming\<id>`, `native\mods.incoming\<id>`). Replacing or renaming a mod:
+  edit `horizon-mods.txt` (`mod.<id>`, and move its `key.<id>.<name>` lines), move the stale cache
+  folders aside, then build. Check `versions\<new tag>
+ative-mods.json` lists the right ids.
+- The GUI self-updates while open; a new launcher may want a **new horizon-mixins revision**. It
+  runs `cargo install … --root native	ools\<rev12>` under `%APPDATA%\horizon-launcher	mp`, which
+  hits the os error 32 below. Install it yourself outside `%APPDATA%` (same `--git/--rev`, the
+  launcher's toolchain, `CARGO_TARGET_DIR` + `CARGO_BUILD_BUILD_DIR` + `TMP`/`TEMP` elsewhere,
+  `--root %APPDATA%\horizon-launcher
+ative	ools\<rev12>`); the launcher then finds it.
+- `Refusing native cache cleanup at an unexpected file or link: …
+ative	arget` after a
+  successful build is the junction below being respected: harmless.
+- Running `horizon-mixins plan` by hand needs the launcher's Rust on `PATH` and its `CARGO_HOME`,
+  or it fails with `E_METADATA: failed to start cargo metadata`.
 
 ## os error 32 ("The process cannot access the file because it is being used by another process")
 

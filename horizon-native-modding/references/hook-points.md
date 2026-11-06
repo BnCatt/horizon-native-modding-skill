@@ -53,7 +53,22 @@ Networking (`game/native_net.rs`):
 - `native_net_send_to_server` / `native_net_from_server` are Horizon's own mod-net protocol: they
   fail on vanilla/Paper servers. Not for talking to Bukkit plugins.
 
+More client hooks, checked on f319701 (API 409):
+
+| Hook | Notes |
+| --- | --- |
+| `zoom` | `native_zoom(&self, zoom: &mut Option<NativeZoom>)`, set it when `None`. `NativeZoom { factor, smooth, turn }`: Horizon clamps `factor` to 1..=10 and `turn` to 0.05..=1, applies it only while playing, and the spyglass wins. `smooth` means *eased FOV* (spyglass-like), not the cinematic camera; `smooth: false` divides the FOV at once. `turn` scales mouse turning. |
+| `render_hand` | `(&self, hand, stack, partial, swing, equip, canceled: &mut bool)`: cancel to hide that hand and its item (e.g. while zoomed). |
+| `wheel` | `(&mut self, steps, claimed: &mut bool)`: claim to keep the wheel from the hotbar; positive steps = wheel up. |
+| `key` | only fires while playing (and in the pause/death screens for presses). A key released **over a screen** doesn't reach it: listen to `input_key` too. |
+| `input_key` | `(&mut self, event: &winit::event::KeyEvent, modifiers)`: every real key event; `keybinds::key_name(code)` (imported in native_hooks.rs) gives the same `key.keyboard.x` names as `key`/`native_mod_key`. |
+| `compute_fov` | `(&self, partial, camera, degrees: &mut f32)`: listen contract but `degrees` is mutable (no 10x cap). |
+
 ## What a client hook can't give you (yet)
+
+- **The cinematic camera** (`Options.smoothCamera`) is Game's private `smooth_camera` field: an
+  OptiFine-style zoom that turns it on needs an internal access (pin), best kept to one tiny
+  `[[module]]` in `game.rs` with `pub(super) fn smooth(&Game)` / `set_smooth(&mut Game, bool)`.
 
 - The address the player joined, the other players' UUIDs and positions, the camera: the
   `EntityRef` helpers (`native_entity_position`…) return `None` on a client (server-side only).

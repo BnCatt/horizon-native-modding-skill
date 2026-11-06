@@ -39,6 +39,16 @@ $CTL $S quit
   `attack <id>`, `select <slot|item>`, `drop`, `chat`, `command`, `respawn`, `entities R type`,
   `looking-at`, `inventory`, `screen`, `events`.
 - `move` doesn't steer a ridden horse (also in single player): not an adapter bug.
+- `key <k>` alone does nothing: use `key <k> tap` (or `down` / `up`). `key c down` + `wait 5` holds a
+  zoom key; `key f3 tap` opens the debug screen for a screenshot.
+- `click-at` and `screen` don't see **native mod screens** (`"screen":"mod"`, no buttons): a mod's own
+  menu can be opened with its key and screenshotted, not clicked. Set its settings for a test by
+  writing the files in the test home's `horizon-mods/.horizon-mod-data/<id>/` before launch.
+- `open <World> <seed> creative` makes a single-player world from the title screen; then
+  `wait-ready`, `give`, `select`, `look`, `scroll-at X Y`, `mouse-move DX DY` (goes through
+  sensitivity and the cinematic camera: a smoothed turn shows as a small yaw right after the move and
+  the rest some ticks later, which is how to prove the cinematic camera is on).
+- `messages` lists recent chat lines: check a mod's chat output (or its absence) there.
 
 ## Bisecting translation bugs
 

@@ -63,6 +63,21 @@ left with a speaker by whoever talks, and a speaker over talking players' heads.
 - "Talking" = a voice packet from that player within the last ~300 ms (and, for yourself, the mic
   thread's transmitting flag).
 
+## Icons, hide key, chat lines (Simple Chat Rust 1.0.0)
+
+- Simple Voice Chat is **"Copyright (c) Max Henkel - All Rights Reserved"**: its textures may not be
+  shipped in a published mod. Draw your own, and let players drop PNGs into
+  `.horizon-mod-data/<id>/icons/<name>.png`, decoded at run time with the `png` crate (0.18, in
+  Horizon's Cargo.lock) and drawn as fills (a player's own copy, never redistributed).
+- A hide-icons key (SVC's default is H) just flips the stored `hide_icons` setting; the HUD status
+  icon and the over-head speakers both check it.
+- A "Chat Messages" setting gates every line the mod puts in the chat (toggle feedback, group
+  joins, errors): filter where the lines are taken, not at each call site.
+- Renaming a mod's id moves its data folder and its `horizon-mods.txt` lines: copy
+  `.horizon-mod-data/<old>/` to the new id and rewrite `mod.<old>`/`key.<old>.*`. Also rename the
+  crate, the `[[module]]` names and helper fn prefixes, or the old and new mod can't be built
+  together.
+
 ## Noise suppression (rnnoise)
 
 SVC's "denoiser" is rnnoise. No crate for it in Horizon's lock (`nnnoiseless` is absent), so load

@@ -7,7 +7,8 @@ description: >-
   crate-id traps (horizon_client vs horizon_client_lib), helpers/modules/crates rules, repairing
   third-party mods after a Nightly moves code, the older-servers protocol adapter (joining 1.21.x
   servers, version picker, 1.21.11 EitherHolder items), a Simple Voice Chat client mod (Opus on
-  Windows), and end-to-end testing with a local Paper server, RCON and horizon-ctl. Use this whenever
+  Windows), zoom/camera mods, publishing to Horizon's mod browser (horizon-mods registry), and
+  end-to-end testing with a local Paper server, RCON and horizon-ctl. Use this whenever
   someone mentions Horizon, horizon-launcher, horizon-mixins, .hnmod, horizon-native-mods, "Rust
   Minecraft" modding, native-build errors (E_TARGET_NOT_FOUND, E_CRATE, E_REVISION, os error 32),
   porting a Fabric mod to Horizon, ViaFabricPlus-like version selection, or voice chat in Horizon,
@@ -35,6 +36,7 @@ Read the reference that matches the task; this page is the map and the rules tha
 | Vanilla-looking screens: sprites, nine-slice, sliders, icons, over-head icons | `references/gui-sprites.md` |
 | Simple Voice Chat client / audio / Opus, rnnoise on Windows | `references/voice-chat.md` |
 | Prove it works (Paper + RCON + horizon-ctl, bisecting) | `references/testing.md` |
+| Get a mod into the launcher's mod browser (registry PR, licences, ids) | `references/publishing.md` |
 
 ## The workflow
 
@@ -94,6 +96,26 @@ Read the reference that matches the task; this page is the map and the rules tha
   build themselves. Horizon's AGENTS.md rules: claim an issue (`🤖 Agent: /claim`), PR body starts
   with `> 🤖 Opened by <login>'s AI agent (<tool, model>), not by <login> personally.`, small PRs,
   `tools/pr_ready.py` output in the template.
+
+## Give back what you learn (do this at the end of every Horizon task)
+
+This skill is open source ([BnCatt/horizon-native-modding-skill](https://github.com/BnCatt/horizon-native-modding-skill))
+and grows from what agents run into. When a task taught you something this skill doesn't say — a
+trap, an error and its fix, a hook's real behaviour, a launcher change, a Nightly that moved code, a
+horizon-ctl trick — **offer to send it upstream** before you finish:
+
+1. Tell the player in one line what you would add, and ask. Opening a PR is outward-facing: only on
+   their yes (their standing instruction to always contribute counts as a yes).
+2. Write it where it belongs (`SKILL.md` only for rules that bite everyone; otherwise the matching
+   `references/*.md`, or a new reference added to the table above), short, verified, in English,
+   with the Nightly/launcher version it was seen on.
+3. Leave out anything private: no personal paths, server addresses, account names, tokens or
+   project details of the player's that aren't needed for the lesson.
+4. `gh repo fork BnCatt/horizon-native-modding-skill --clone`, a branch, one focused commit, and a PR
+   whose body starts with `> 🤖 Opened by <login>'s AI agent (<tool, model>), not by <login> personally.`
+   and says what was learned and how it was verified. Check open PRs first and don't duplicate one.
+
+See `CONTRIBUTING.md` in the repository.
 
 ## Scripts
 
