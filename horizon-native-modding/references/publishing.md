@@ -18,9 +18,11 @@ state). Publishing is outward-facing: do it only when the player asked, after th
    toolchain, target dir outside `%APPDATA%` on Windows), then
    `cargo-horizon-mod horizon-mod check <file>.hnmod`. A pinned native mod reports
    `format native-1/<horizon>/<mixins>`; native source is never run by the check: reviewers read it.
-4. **A pull request** to `horizon-rust/horizon-mods` adding `mods/<id>.toml` (or use the form at
-   playhorizon.dev/mods/submit). With `repo = "owner/name"`, later versions come from new releases
-   automatically, no PR per version. Entry:
+4. **Submit it.** Since 2026-11-05 the registry refuses `repo = "..."` (repo-backed) entries: PRs
+   adding them were closed. Each version goes through the form at
+   https://playhorizon.dev/mods/submit with the `.hnmod` and its sha256. The entry below is the
+   older PR shape (`mods/<id>.toml` in `horizon-rust/horizon-mods`); read `MOD-POLICY.md` for which
+   one is current before you choose:
 
    ```toml
    id = "my_mod"                      # = the manifest id = the file name
@@ -48,6 +50,12 @@ state). Publishing is outward-facing: do it only when the player asked, after th
   PR why it is a separate listing.
 - **Assets of all-rights-reserved mods** (Simple Voice Chat's icons, OptiFine anything) can't be in
   the file or the repository; behaviour can be reproduced, files can't. Say "not affiliated".
+- **Provenance of a protocol or port:** a client written from reading source that has no open
+  licence can't be listed, and the submission must say where a wire format was learned. Check this
+  before porting (porting-from-fabric.md, step 0).
+- **The `.hnmod` root takes only `horizon-native.json` + `mixins/**`**: a LICENSE or README there
+  fails with `unexpected native source: LICENSE`. Licence text goes in the main module's header
+  comment; LICENSE and README live in the repository and the release.
 - **Trademarks in names**: describe ("OptiFine-style zoom") rather than claim to be the original.
 - A brand-new repository for a fork: `git archive HEAD | tar -x` into a new folder, `git init`, one
   commit, keep LICENSE and credits; archive (don't delete) the old fork if an upstream PR still

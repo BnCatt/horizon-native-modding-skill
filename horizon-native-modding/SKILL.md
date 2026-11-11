@@ -11,9 +11,11 @@ description: >-
   end-to-end testing with a local Paper server, RCON and horizon-ctl. Use this whenever
   someone mentions Horizon, horizon-launcher, horizon-mixins, .hnmod, horizon-native-mods, "Rust
   Minecraft" modding, native-build errors (E_TARGET_NOT_FOUND, E_CRATE, E_REVISION, os error 32),
-  porting a Fabric mod to Horizon, ViaFabricPlus-like version selection, or voice chat in Horizon,
-  even if they don't say "skill" or "native mod". Turkish cues: "horizon mod yap", "rust minecraft
-  mod", "native mod derle", "hnmod", "launcher derleme hatası", "1.21.11 sunucuya gir".
+  porting a Fabric/Forge/NeoForge mod to Horizon (1:1, pixel-identical, side-by-side checked),
+  ViaFabricPlus-like version selection, or voice chat in Horizon, even if they don't say "skill" or
+  "native mod". Turkish cues: "horizon mod yap", "rust minecraft mod", "native mod derle", "hnmod",
+  "launcher derleme hatası", "1.21.11 sunucuya gir", "bu modu horizona portla", "birebir port",
+  "java modunu rusta çevir".
 ---
 
 # Horizon native modding
@@ -28,6 +30,7 @@ Read the reference that matches the task; this page is the map and the rules tha
 
 | Task | Read |
 | --- | --- |
+| Port a Fabric/Forge mod 1:1 (Java → hook map, parity proof) | `references/porting-from-fabric.md` |
 | Write or change a mod (manifest, helpers, modules, crates) | `references/mixins-manifest.md` |
 | Pick hook points, check what a Nightly offers (API level) | `references/hook-points.md` |
 | Launcher build fails, Windows `os error 32`, dev loop | `references/launcher-build-windows.md` |
@@ -104,16 +107,26 @@ and grows from what agents run into. When a task taught you something this skill
 trap, an error and its fix, a hook's real behaviour, a launcher change, a Nightly that moved code, a
 horizon-ctl trick — **offer to send it upstream** before you finish:
 
-1. Tell the player in one line what you would add, and ask. Opening a PR is outward-facing: only on
+**Worth sending:** a Java→Horizon mapping missing from `porting-from-fabric.md` (a Fabric API,
+event or mixin and the hook/helper that replaced it, with its API level), a hook's real behaviour, an
+error and its cause, a parity trap, a launcher/registry change, a script. **Not worth sending:** the
+player's project notes, guesses you didn't verify, anything the skill already says.
+
+1. Re-read the matching reference: if it already says it, there is nothing to send.
+2. Tell the player in one line what you would add, and ask. Opening a PR is outward-facing: only on
    their yes (their standing instruction to always contribute counts as a yes).
-2. Write it where it belongs (`SKILL.md` only for rules that bite everyone; otherwise the matching
+3. Write it where it belongs (`SKILL.md` only for rules that bite everyone; otherwise the matching
    `references/*.md`, or a new reference added to the table above), short, verified, in English,
-   with the Nightly/launcher version it was seen on.
-3. Leave out anything private: no personal paths, server addresses, account names, tokens or
+   with the Nightly/launcher version or hook API level it was seen on.
+4. Leave out anything private: no personal paths, server addresses, account names, tokens or
    project details of the player's that aren't needed for the lesson.
-4. `gh repo fork BnCatt/horizon-native-modding-skill --clone`, a branch, one focused commit, and a PR
+5. Check for duplicates: `gh pr list -R BnCatt/horizon-native-modding-skill --state open` and
+   `--search "<keyword>"`. If an open PR covers it, comment there instead.
+6. `gh repo fork BnCatt/horizon-native-modding-skill --clone`, a branch, one focused commit, and a PR
    whose body starts with `> 🤖 Opened by <login>'s AI agent (<tool, model>), not by <login> personally.`
-   and says what was learned and how it was verified. Check open PRs first and don't duplicate one.
+   and says what was learned and how it was verified.
+7. No `gh` or no GitHub account: give the player the patch (`git diff`) and the PR text to send
+   themselves, or skip it. Never stall the player's task over this.
 
 See `CONTRIBUTING.md` in the repository.
 

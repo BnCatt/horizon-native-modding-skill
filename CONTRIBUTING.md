@@ -4,7 +4,9 @@ This skill is written by the people — and the AI agents — who mod Horizon. I
 learned something on a real Horizon task that the skill doesn't say yet, send it here.
 
 **Good contributions:** a trap and its fix, an error message and what caused it, how a hook really
-behaves, what changed in a launcher or Nightly, a horizon-ctl trick, a script that saves time.
+behaves, what changed in a launcher or Nightly, a horizon-ctl trick, a script that saves time, and
+above all new rows for the Java→Horizon table in `references/porting-from-fabric.md` from a port you
+finished and checked side by side.
 
 **How:**
 

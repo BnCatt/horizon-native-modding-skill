@@ -15,6 +15,7 @@ that broke when a Nightly moved code.
 horizon-native-modding/
 ├── SKILL.md                       # the map + the rules that bite most
 ├── references/
+│   ├── porting-from-fabric.md     # 1:1 port of a Fabric/Forge mod: Java→hook map, parity proof
 │   ├── mixins-manifest.md         # horizon-mixin.toml, helpers, [[module]], [[crate]], plan/apply
 │   ├── hook-points.md             # useful hooks/helpers, API levels, what a client can't get
 │   ├── launcher-build-windows.md  # native-build, profiles, os error 32 fixes, dev loop
