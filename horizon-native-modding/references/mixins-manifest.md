@@ -77,6 +77,10 @@ MODIFY_VARIABLE, WRAP_OPERATION, OVERWRITE. HEAD + cancellable covers most needs
 - To tell which: `grep -n "pub mod <name>" crates/horizon-client/src/client_lib.rs` (lib) vs
   `crates/horizon-client/src/game.rs` / `main.rs` (game crate).
 - Private fns are fine as targets (`horizon_protocol::item::older_layout` is private).
+- A method's id is the module of the **file its `impl` block sits in**, then the type:
+  `Game::tick_hand` lives in `game/hand.rs` → `horizon_client::game::hand::Game<'_>::tick_hand`;
+  only methods written in `game.rs` itself are `horizon_client::game::Game<'_>::…`. Upstream keeps
+  moving `impl Game` blocks out of `game.rs` into `game/*.rs`, which changes these ids.
 - A target that moved or was renamed fails `plan` with `E_TARGET_NOT_FOUND` and the exact id.
 
 ## Helpers

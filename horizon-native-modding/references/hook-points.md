@@ -64,7 +64,16 @@ More client hooks, checked on f319701 (API 409):
 | `input_key` | `(&mut self, event: &winit::event::KeyEvent, modifiers)`: every real key event; `keybinds::key_name(code)` (imported in native_hooks.rs) gives the same `key.keyboard.x` names as `key`/`native_mod_key`. |
 | `compute_fov` | `(&self, partial, camera, degrees: &mut f32)`: listen contract but `degrees` is mutable (no 10x cap). |
 
+Nightly 2026-11-13 (`9f42064`) is API 415: 412 `native_force_chunk` / `native_forced_chunks`, 413
+`native_force_chunk_in`, 414 `native_world_hold`, 415 `native_world_warp` (WGSL on every terrain and
+entity vertex). Mods written against API 409–411 hooks built on it unchanged.
+
 ## What a client hook can't give you (yet)
+
+- **The arm swing** (`LivingEntity.SwingState`): no hook reads or changes it. `render_hand` gets the
+  swing progress and can hide the hand; `render_hand_pose` (API 369) adds an offset, rotation and
+  scale to the first-person pose, but neither sees which animation is playing or can end it. See
+  the `baseTick` row in porting-from-fabric.md.
 
 - **The cinematic camera** (`Options.smoothCamera`) is Game's private `smooth_camera` field: an
   OptiFine-style zoom that turns it on needs an internal access (pin), best kept to one tiny

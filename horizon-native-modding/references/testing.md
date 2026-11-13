@@ -49,6 +49,22 @@ $CTL $S quit
   sensitivity and the cinematic camera: a smoothed turn shows as a small yaw right after the move and
   the rest some ticks later, which is how to prove the cinematic camera is on).
 - `messages` lists recent chat lines: check a mod's chat output (or its absence) there.
+- **Tick-exact steps go in one `script`.** Every separate `horizon-ctl` call costs several ticks
+  (a new process and a round trip), so "attack, 2 ticks later swap, 9 ticks later screenshot" as
+  four calls shoots the screenshot after a 23-tick animation is over. Pipe the lines to
+  `horizon-ctl script` (`attack` / `wait 2` / `select golden_apple` / `wait 9` /
+  `screenshot C:/abs/path.png`): `wait`'s replies show the tick each step ran at.
+- `state` (not `status`) has the player's `swings` (arm swings started), `using`, `mining`: use it
+  to check that an `attack` in the air really swung.
+- A visual A/B of an animation fix: the same script with the mod's setting off and on, plus a
+  screenshot at rest; "on" equals the rest pose, "off" shows the bug. Different world names put the
+  player elsewhere, so compare the hand, not the scenery.
+- `click <id>` uses the label's slug (`Lunge animation fix: ON` → `lunge-animation-fix`, the value
+  after the colon is not part of it); `ui` lists the ids. The Options > Mods rows are
+  `<name>-<version>` with a `settings[-N]` button each, reachable from the title screen.
+- An installed Nightly's `horizon-ctl.exe` and prepared resources also drive a newer locally built
+  `horizon-client.exe` (seen: 2026-11-07's ctl and resources with a 2026-11-13 build), so the newest
+  Nightly doesn't have to be installed in the launcher to test against its source.
 
 ## Bisecting translation bugs
 

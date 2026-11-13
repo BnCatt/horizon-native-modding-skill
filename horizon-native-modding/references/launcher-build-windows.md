@@ -27,6 +27,13 @@ horizon-launcher native-build --trust-native-code --allow-version-mismatch --pro
   / Development / Release build.
 - `--allow-version-mismatch`: the player's mods pin different Nightlies (common). Builds on the
   newest pin. `--ignore-pins` builds everything on the selected version instead.
+- Launcher 0.2.63: the first pass is on **the Horizon the instance plays**, even when mods pin a
+  newer one ("Building anyway on 2ebf00a"); when a mod doesn't apply there it drops it, then says
+  "`<mods>` didn't build on the Horizon you play: building on the one they were made for" and
+  starts over on the newest pin. To go straight to a Nightly, install it and name it:
+  `horizon-launcher install nightly-<date>-<short>`, `horizon-launcher prepare --version <tag>`
+  (the install prints this; it downloads the game files), then `native-build … --version <tag>`.
+  `install` also sets `selected` in `settings.json` to the new tag.
 - `--trust-native-code` = the player's consent to run the mods' code. Use only when they asked.
 - Success prints `native-<short>-<hash> built and selected for its instance`.
 - Close the launcher GUI first: a running GUI holds files in `native\` → os error 32. A running
@@ -40,23 +47,20 @@ horizon-launcher native-build --trust-native-code --allow-version-mismatch --pro
   out, and a removed mod whose line still says `true` can come back from the launcher's caches
   (`native\installed.incoming\<id>`, `native\mods.incoming\<id>`). Replacing or renaming a mod:
   edit `horizon-mods.txt` (`mod.<id>`, and move its `key.<id>.<name>` lines), move the stale cache
-  folders aside, then build. Check `versions\<new tag>
-ative-mods.json` lists the right ids.
+  folders aside, then build. Check `versions\<new tag>\native-mods.json` lists the right ids.
 - The GUI self-updates while open; a new launcher may want a **new horizon-mixins revision**. It
-  runs `cargo install … --root native	ools\<rev12>` under `%APPDATA%\horizon-launcher	mp`, which
+  runs `cargo install … --root native\tools\<rev12>` under `%APPDATA%\horizon-launcher\tmp`, which
   hits the os error 32 below. Install it yourself outside `%APPDATA%` (same `--git/--rev`, the
   launcher's toolchain, `CARGO_TARGET_DIR` + `CARGO_BUILD_BUILD_DIR` + `TMP`/`TEMP` elsewhere,
-  `--root %APPDATA%\horizon-launcher
-ative	ools\<rev12>`); the launcher then finds it.
-- `Refusing native cache cleanup at an unexpected file or link: …
-ative	arget` after a
+  `--root %APPDATA%\horizon-launcher\native\tools\<rev12>`); the launcher then finds it.
+- `Refusing native cache cleanup at an unexpected file or link: …\native\target` after a
   successful build is the junction below being respected: harmless.
 - Running `horizon-mixins plan` by hand needs the launcher's Rust on `PATH` and its `CARGO_HOME`,
   or it fails with `E_METADATA: failed to start cargo metadata`.
 
 ## os error 32 ("The process cannot access the file because it is being used by another process")
 
-Seen three ways; fix in this order:
+Seen four ways; fix in this order (the fourth has its own tell):
 
 1. **GUI open** → close it (`Stop-Process -Name horizon-launcher`), retry.
 2. **Cache pruning**: after "Reusing patched game source"/"Applying the mixins", the launcher
@@ -75,6 +79,14 @@ Seen three ways; fix in this order:
 
    Reversible (remove the junction, move the folder back). Leftover empty `.tmp*.temp-archive`
    folders can be deleted once the build stops.
+4. **The build starts over on another Horizon commit in the same run** (launcher 0.2.63: mods
+   repinned to a Nightly newer than the one the instance plays). The log reads "…didn't build on the
+   Horizon you play: building on the one they were made for", "Incremental rebuild: Horizon commit
+   `<old>` to `<new>`", "Downloading Horizon's source at `<new>`", then `os error 32` with no
+   `horizon-mixins apply` line, the same on every retry, `prep_native_build.sh` or not. Don't
+   retry: make it a single pass by installing that Nightly and passing `--version <tag>` (see
+   Command). Seen with 11 mods moved from 2026-11-07 to 2026-11-13: two failures in 30 s, then a
+   clean release build in 24 min 25 s.
 
 ## Reading failures
 
